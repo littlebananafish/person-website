@@ -10,8 +10,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- 自定义样式 -->
     <link rel="stylesheet" href="styles.css">
+    <script>
+        console.log("页面加载中...");
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM已加载完成");
+            console.log("星球容器:", document.getElementById('planet-container'));
+        });
+    </script>
 </head>
 <body>
     <!-- 星空背景 -->
@@ -25,6 +34,9 @@
     <div class="cursor"></div>
     <!-- 飞船轨迹 -->
     <div class="cursor-trail"></div>
+    
+    <!-- 行星容器 - 放在顶层 -->
+    <div id="planet-container"></div>
 
     <!-- 头部区域 -->
     <header>
@@ -44,12 +56,7 @@
         <!-- 个人信息部分 -->
         <section id="home" class="section">
             <div class="container">
-                <h2>关于我</h2>
-                <div class="profile-content">
-                    <div class="profile-text">
-                        <p>欢迎来到我的个人空间</p>
-                    </div>
-                </div>
+                <!-- 星球已移至顶层 -->
             </div>
         </section>
 
@@ -78,5 +85,6 @@
 
     <!-- 自定义脚本 -->
     <script src="script.js"></script>
+    <script src="planet.js"></script>
 </body>
 </html> 
