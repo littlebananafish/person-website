@@ -1,23 +1,119 @@
 // 飞船光标控制
 const cursor = document.querySelector('.cursor');
+const cursorTrail = document.querySelector('.cursor-trail');
 let mouseX = 0;
 let mouseY = 0;
 let cursorX = 0;
 let cursorY = 0;
+let cursorScale = 1;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let speed = 0;
+let isMoving = false;
+let movingTimeout;
+let trailTimer = 0;
 
 document.addEventListener('mousemove', (e) => {
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
     mouseX = e.clientX;
     mouseY = e.clientY;
+    
+    // 计算鼠标移动速度
+    const dx = mouseX - lastMouseX;
+    const dy = mouseY - lastMouseY;
+    speed = Math.sqrt(dx * dx + dy * dy);
+    
+    // 创建飞船轨迹效果
+    if (speed > 3 && Date.now() - trailTimer > 50) {
+        createTrailParticle();
+        trailTimer = Date.now();
+    }
+    
+    // 设置动态缩放和发光效果
+    if (speed > 5) {
+        cursorScale = 0.8;
+        cursor.style.filter = 'drop-shadow(0 0 8px var(--accent-color))';
+        isMoving = true;
+        
+        // 清除之前的超时
+        clearTimeout(movingTimeout);
+        
+        // 设置新的超时
+        movingTimeout = setTimeout(() => {
+            isMoving = false;
+        }, 100);
+    } else if (!isMoving) {
+        cursorScale = 1;
+        cursor.style.filter = 'drop-shadow(0 0 5px var(--accent-color))';
+    }
+});
+
+// 创建轨迹粒子
+function createTrailParticle() {
+    const trail = document.createElement('div');
+    trail.className = 'trail-particle';
+    trail.style.left = cursorX + 'px';
+    trail.style.top = cursorY + 'px';
+    trail.style.position = 'absolute';
+    trail.style.width = '6px';
+    trail.style.height = '6px';
+    trail.style.borderRadius = '50%';
+    trail.style.background = `linear-gradient(to right, var(--accent-color), transparent)`;
+    trail.style.opacity = '0.8';
+    trail.style.filter = 'blur(1px)';
+    trail.style.transform = 'translate(-50%, -50%)';
+    trail.style.zIndex = '9998';
+    trail.style.pointerEvents = 'none';
+    
+    cursorTrail.appendChild(trail);
+    
+    // 动画效果
+    gsap.to(trail, {
+        width: '12px',
+        height: '12px',
+        opacity: 0,
+        duration: 1,
+        ease: 'power1.out',
+        onComplete: () => {
+            trail.remove();
+        }
+    });
+}
+
+// 给链接添加光标悬停效果
+const links = document.querySelectorAll('a');
+links.forEach(link => {
+    link.addEventListener('mouseenter', () => {
+        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(1.2) rotate(${Math.atan2(mouseY - cursorY, mouseX - cursorX) * (180 / Math.PI)}deg)`;
+        cursor.style.filter = 'drop-shadow(0 0 10px var(--accent-color))';
+    });
+    
+    link.addEventListener('mouseleave', () => {
+        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(${cursorScale}) rotate(${Math.atan2(mouseY - cursorY, mouseX - cursorX) * (180 / Math.PI)}deg)`;
+        cursor.style.filter = 'drop-shadow(0 0 5px var(--accent-color))';
+    });
 });
 
 function animateCursor() {
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
     
+    // 平滑跟随效果
     cursorX += dx * 0.1;
     cursorY += dy * 0.1;
     
-    cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`;
+    // 应用变换
+    cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(${cursorScale}) rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`;
+    
+    // 添加小幅度飘动效果
+    if (!isMoving) {
+        const time = Date.now() / 1000;
+        const floatX = Math.sin(time) * 2;
+        const floatY = Math.cos(time * 0.8) * 2;
+        
+        cursor.style.transform = `translate(${cursorX + floatX}px, ${cursorY + floatY}px) scale(${cursorScale}) rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`;
+    }
     
     requestAnimationFrame(animateCursor);
 }
