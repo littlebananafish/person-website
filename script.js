@@ -50,8 +50,15 @@ document.addEventListener('mousemove', (e) => {
 function createTrailParticle() {
     const trail = document.createElement('div');
     trail.className = 'trail-particle';
-    trail.style.left = cursorX + 'px';
-    trail.style.top = cursorY + 'px';
+    
+    // 计算拖尾位置（在飞船后方）
+    const angle = Math.atan2(mouseY - cursorY, mouseX - cursorX);
+    const distance = 20; // 拖尾与飞船的距离
+    const trailX = cursorX - Math.cos(angle) * distance;
+    const trailY = cursorY - Math.sin(angle) * distance;
+    
+    trail.style.left = trailX + 'px';
+    trail.style.top = trailY + 'px';
     trail.style.position = 'absolute';
     trail.style.width = '8px';
     trail.style.height = '8px';
@@ -59,7 +66,7 @@ function createTrailParticle() {
     trail.style.background = `linear-gradient(to right, var(--accent-color), transparent)`;
     trail.style.opacity = '0.6';
     trail.style.filter = 'blur(1px)';
-    trail.style.transform = 'translate(-50%, -50%)';
+    trail.style.transform = `translate(-50%, -50%) rotate(${angle * (180 / Math.PI)}deg)`;
     trail.style.zIndex = '9998';
     trail.style.pointerEvents = 'none';
     
@@ -152,4 +159,31 @@ document.addEventListener('DOMContentLoaded', () => {
         section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
         observer.observe(section);
     });
-}); 
+
+    createStars();
+});
+
+// 创建星光背景
+function createStars() {
+    const starsContainer = document.querySelector('.stars-container');
+    const starCount = 100; // 星星数量
+    
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // 随机位置
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        
+        // 随机大小
+        const size = Math.random() * 2 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        
+        // 随机动画延迟
+        star.style.animationDelay = Math.random() * 2 + 's';
+        
+        starsContainer.appendChild(star);
+    }
+} 
