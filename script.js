@@ -25,7 +25,7 @@ document.addEventListener('mousemove', (e) => {
     speed = Math.sqrt(dx * dx + dy * dy);
     
     // 创建飞船轨迹效果
-    if (speed > 3 && Date.now() - trailTimer > 50) {
+    if (speed > 3 && Date.now() - trailTimer > 100) {
         createTrailParticle();
         trailTimer = Date.now();
     }
@@ -36,10 +36,7 @@ document.addEventListener('mousemove', (e) => {
         cursor.style.filter = 'drop-shadow(0 0 8px var(--accent-color))';
         isMoving = true;
         
-        // 清除之前的超时
         clearTimeout(movingTimeout);
-        
-        // 设置新的超时
         movingTimeout = setTimeout(() => {
             isMoving = false;
         }, 100);
@@ -56,11 +53,11 @@ function createTrailParticle() {
     trail.style.left = cursorX + 'px';
     trail.style.top = cursorY + 'px';
     trail.style.position = 'absolute';
-    trail.style.width = '6px';
-    trail.style.height = '6px';
+    trail.style.width = '8px';
+    trail.style.height = '8px';
     trail.style.borderRadius = '50%';
     trail.style.background = `linear-gradient(to right, var(--accent-color), transparent)`;
-    trail.style.opacity = '0.8';
+    trail.style.opacity = '0.6';
     trail.style.filter = 'blur(1px)';
     trail.style.transform = 'translate(-50%, -50%)';
     trail.style.zIndex = '9998';
@@ -70,10 +67,10 @@ function createTrailParticle() {
     
     // 动画效果
     gsap.to(trail, {
-        width: '12px',
-        height: '12px',
+        width: '16px',
+        height: '16px',
         opacity: 0,
-        duration: 1,
+        duration: 1.5,
         ease: 'power1.out',
         onComplete: () => {
             trail.remove();
@@ -99,9 +96,9 @@ function animateCursor() {
     const dx = mouseX - cursorX;
     const dy = mouseY - cursorY;
     
-    // 平滑跟随效果
-    cursorX += dx * 0.1;
-    cursorY += dy * 0.1;
+    // 降低跟随速度，使移动更平滑
+    cursorX += dx * 0.15;
+    cursorY += dy * 0.15;
     
     // 应用变换
     cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) scale(${cursorScale}) rotate(${Math.atan2(dy, dx) * (180 / Math.PI)}deg)`;
