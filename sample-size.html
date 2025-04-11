@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>样本量计算器 - 源三岁</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="calculator.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>源三岁</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li class="dropdown">
+                        <a href="#tools">小工具集合</a>
+                        <div class="dropdown-content">
+                            <a href="sample-size.html">样本量计算器</a>
+                            <a href="#tool2">工具2</a>
+                            <a href="#tool3">工具3</a>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main class="calculator-container">
+            <h2>样本量计算器</h2>
+            <p class="description">
+                使用此计算器来确定在估计具有特定属性的人群比例时所需的适当样本量（例如：喜欢您的产品、拥有汽车或会说第二语言的人群比例）。
+            </p>
+            
+            <div class="calculator">
+                <div class="input-group">
+                    <label>
+                        误差范围 (%)
+                        <input type="number" id="margin" value="5" min="1" max="20" step="0.1">
+                        <small>常用选择为5%</small>
+                    </label>
+                </div>
+                
+                <div class="input-group">
+                    <label>
+                        置信水平 (%)
+                        <input type="number" id="confidence" value="95" min="80" max="99" step="0.1">
+                        <small>典型选择为90%、95%或99%</small>
+                    </label>
+                </div>
+                
+                <div class="input-group">
+                    <label>
+                        总体大小
+                        <input type="number" id="population" value="100000" min="1">
+                        <small>如果不确定，使用100,000</small>
+                    </label>
+                </div>
+                
+                <div class="input-group">
+                    <label>
+                        预期样本比例 (%)
+                        <input type="number" id="proportion" value="50" min="1" max="99" step="0.1">
+                        <small>如果不确定，使用50%</small>
+                    </label>
+                </div>
+                
+                <div class="result">
+                    <h3>推荐样本量：</h3>
+                    <div id="sample-size" class="result-number">383</div>
+                </div>
+            </div>
+            
+            <div class="alternative-scenarios">
+                <h3>替代方案</h3>
+                <div class="scenarios-grid">
+                    <!-- 替代方案表格将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 源三岁. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <script src="calculator.js"></script>
+</body>
+</html> 
