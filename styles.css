@@ -83,6 +83,7 @@ nav a {
 nav a:hover {
     color: var(--nav-hover);
     background: var(--card-bg);
+    cursor: url('wand-cursor.svg'), auto;
 }
 
 /* 主题切换按钮 */
@@ -90,7 +91,7 @@ nav a:hover {
     background: none;
     border: none;
     color: var(--text-color);
-    cursor: pointer;
+    cursor: url('wand-cursor.svg'), pointer;
     padding: 8px;
     border-radius: 6px;
     display: flex;
@@ -258,4 +259,4 @@ footer {
         right: 0;
         border-radius: 0;
     }
-} 
+}
