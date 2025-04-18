@@ -1,4 +1,37 @@
-// 初始化画布
+// 主题切换功能
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+
+// 检查本地存储中的主题设置
+const savedTheme = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+
+// 更新主题切换按钮的图标
+function updateThemeIcon() {
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    const icon = themeToggle.querySelector('svg');
+    icon.innerHTML = isDark ? 
+        '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>' : 
+        '<path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+}
+
+// 切换主题
+themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon();
+    
+    // 更新分形动画颜色
+    updateFractalColors(newTheme);
+});
+
+// 初始化主题图标
+updateThemeIcon();
+
+// 分形动画代码
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 const fractalCanvas = document.getElementById('fractalCanvas');
@@ -14,14 +47,30 @@ window.addEventListener('resize', resizeCanvas);
 
 // 分形参数
 let time = 0;
-const colors = [
+let colors = [
     '#ff0000', '#00ff00', '#0000ff',
     '#ffff00', '#ff00ff', '#00ffff'
 ];
 
+// 更新分形颜色
+function updateFractalColors(theme) {
+    if (theme === 'light') {
+        colors = [
+            '#ff6b6b', '#4CAF50', '#2196F3',
+            '#FFC107', '#9C27B0', '#00BCD4'
+        ];
+    } else {
+        colors = [
+            '#ff0000', '#00ff00', '#0000ff',
+            '#ffff00', '#ff00ff', '#00ffff'
+        ];
+    }
+}
+
 // 绘制分形
 function drawFractal() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    ctx.fillStyle = isDark ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     const centerX = canvas.width / 2;
