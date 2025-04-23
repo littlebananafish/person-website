@@ -66,6 +66,8 @@ function hello() {
     document.getElementById('btn-link').addEventListener('click', () => insertMarkdown('[', '](https://example.com)', '链接文本'));
     document.getElementById('btn-image').addEventListener('click', () => insertMarkdown('![', '](https://example.com/image.jpg)', '图片描述'));
     document.getElementById('btn-list').addEventListener('click', () => insertMarkdown('- ', '', '列表项'));
+    document.getElementById('btn-ordered-list').addEventListener('click', () => insertMarkdown('1. ', '', '列表项'));
+    document.getElementById('btn-table').addEventListener('click', () => insertTable());
     document.getElementById('btn-code').addEventListener('click', () => insertMarkdown('```\n', '\n```', '代码块'));
     
     // 操作按钮事件
@@ -87,6 +89,17 @@ function renderMarkdown() {
     // 这里使用简化版，实际项目中可以使用成熟的库如marked.js
     const html = parseMarkdown(markdownInput.value);
     markdownPreview.innerHTML = html;
+}
+
+// 插入表格模板
+function insertTable() {
+    const tableTemplate = 
+`| 标题1 | 标题2 | 标题3 |
+|-------|-------|-------|
+| 内容1 | 内容2 | 内容3 |
+| 内容4 | 内容5 | 内容6 |`;
+    
+    insertMarkdown(tableTemplate, '', '');
 }
 
 // 简单的Markdown解析函数
@@ -117,13 +130,14 @@ function parseMarkdown(markdown) {
     // 处理图片
     markdown = markdown.replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">');
     
+    // 处理表格
+    markdown = processTable(markdown);
+    
     // 处理无序列表
-    markdown = markdown.replace(/^\s*- (.*$)/gm, '<li>$1</li>');
-    markdown = markdown.replace(/(<li>.*<\/li>)\s*(<li>)/g, '$1<li>');
-    markdown = markdown.replace(/(<li>.*<\/li>)/, '<ul>$1</ul>');
+    markdown = processUnorderedList(markdown);
     
     // 处理有序列表
-    markdown = markdown.replace(/^\s*\d+\. (.*$)/gm, '<li>$1</li>');
+    markdown = processOrderedList(markdown);
     
     // 处理引用
     markdown = markdown.replace(/^\> (.*$)/gm, '<blockquote>$1</blockquote>');
@@ -144,6 +158,205 @@ function parseMarkdown(markdown) {
     });
     
     return markdown;
+}
+
+// 处理无序列表的辅助函数
+function processUnorderedList(markdown) {
+    // 找到所有无序列表项
+    const listItemRegex = /^\s*- (.*$)/gm;
+    let listItems = [];
+    let match;
+    
+    while ((match = listItemRegex.exec(markdown)) !== null) {
+        listItems.push({
+            index: match.index,
+            length: match[0].length,
+            content: match[1],
+            replaced: false
+        });
+    }
+    
+    if (listItems.length === 0) return markdown;
+    
+    // 按索引排序以确保正确的替换顺序
+    listItems.sort((a, b) => b.index - a.index);
+    
+    // 检测连续的列表项并进行分组
+    let currentGroup = [listItems[0]];
+    let groups = [currentGroup];
+    
+    for (let i = 1; i < listItems.length; i++) {
+        const prevItem = listItems[i - 1];
+        const currentItem = listItems[i];
+        
+        // 检查两个列表项之间是否只有空行或没有内容
+        const textBetween = markdown.substring(
+            currentItem.index + currentItem.length,
+            prevItem.index
+        ).trim();
+        
+        if (textBetween === '') {
+            // 属于同一组
+            currentGroup.push(currentItem);
+        } else {
+            // 开始新分组
+            currentGroup = [currentItem];
+            groups.push(currentGroup);
+        }
+    }
+    
+    // 为每个分组创建一个<ul>...</ul>
+    for (const group of groups) {
+        // 按原始顺序排序
+        group.sort((a, b) => a.index - b.index);
+        
+        // 创建HTML
+        let html = '<ul>';
+        for (const item of group) {
+            html += `<li>${item.content}</li>`;
+            item.replaced = true;
+        }
+        html += '</ul>';
+        
+        // 替换第一个列表项的全部内容
+        const firstItem = group[0];
+        const lastItem = group[group.length - 1];
+        const startPos = firstItem.index;
+        const endPos = lastItem.index + lastItem.length;
+        const originalText = markdown.substring(startPos, endPos);
+        
+        markdown = markdown.substring(0, startPos) + html + markdown.substring(endPos);
+        
+        // 调整后续项的索引
+        const lengthDiff = html.length - originalText.length;
+        for (let i = 0; i < listItems.length; i++) {
+            if (!listItems[i].replaced && listItems[i].index > startPos) {
+                listItems[i].index += lengthDiff;
+            }
+        }
+    }
+    
+    return markdown;
+}
+
+// 处理有序列表的辅助函数
+function processOrderedList(markdown) {
+    // 找到所有有序列表项
+    const listItemRegex = /^\s*\d+\. (.*$)/gm;
+    let listItems = [];
+    let match;
+    
+    while ((match = listItemRegex.exec(markdown)) !== null) {
+        listItems.push({
+            index: match.index,
+            length: match[0].length,
+            content: match[1],
+            replaced: false
+        });
+    }
+    
+    if (listItems.length === 0) return markdown;
+    
+    // 按索引排序以确保正确的替换顺序
+    listItems.sort((a, b) => b.index - a.index);
+    
+    // 检测连续的列表项并进行分组
+    let currentGroup = [listItems[0]];
+    let groups = [currentGroup];
+    
+    for (let i = 1; i < listItems.length; i++) {
+        const prevItem = listItems[i - 1];
+        const currentItem = listItems[i];
+        
+        // 检查两个列表项之间是否只有空行或没有内容
+        const textBetween = markdown.substring(
+            currentItem.index + currentItem.length,
+            prevItem.index
+        ).trim();
+        
+        if (textBetween === '') {
+            // 属于同一组
+            currentGroup.push(currentItem);
+        } else {
+            // 开始新分组
+            currentGroup = [currentItem];
+            groups.push(currentGroup);
+        }
+    }
+    
+    // 为每个分组创建一个<ol>...</ol>
+    for (const group of groups) {
+        // 按原始顺序排序
+        group.sort((a, b) => a.index - b.index);
+        
+        // 创建HTML
+        let html = '<ol>';
+        for (const item of group) {
+            html += `<li>${item.content}</li>`;
+            item.replaced = true;
+        }
+        html += '</ol>';
+        
+        // 替换第一个列表项的全部内容
+        const firstItem = group[0];
+        const lastItem = group[group.length - 1];
+        const startPos = firstItem.index;
+        const endPos = lastItem.index + lastItem.length;
+        const originalText = markdown.substring(startPos, endPos);
+        
+        markdown = markdown.substring(0, startPos) + html + markdown.substring(endPos);
+        
+        // 调整后续项的索引
+        const lengthDiff = html.length - originalText.length;
+        for (let i = 0; i < listItems.length; i++) {
+            if (!listItems[i].replaced && listItems[i].index > startPos) {
+                listItems[i].index += lengthDiff;
+            }
+        }
+    }
+    
+    return markdown;
+}
+
+// 处理表格的辅助函数
+function processTable(markdown) {
+    // 表格的正则表达式模式：至少需要表头行、分隔行和一个数据行
+    const tableRegex = /^\|(.*)\|\s*\n\|([-:\|\s]*)\|\s*\n(\|.*\|\s*\n?)+/gm;
+    
+    return markdown.replace(tableRegex, function(table) {
+        // 分割表格行
+        const rows = table.trim().split('\n');
+        
+        if (rows.length < 3) return table; // 至少需要表头、分隔行和一个数据行
+        
+        let html = '<table><thead><tr>';
+        
+        // 处理表头
+        const headers = rows[0].split('|').filter(cell => cell.trim() !== '');
+        for (const header of headers) {
+            html += `<th>${header.trim()}</th>`;
+        }
+        
+        html += '</tr></thead><tbody>';
+        
+        // 跳过第一行（表头）和第二行（分隔行）
+        for (let i = 2; i < rows.length; i++) {
+            const row = rows[i];
+            if (row.trim() === '') continue;
+            
+            html += '<tr>';
+            const cells = row.split('|').filter(cell => cell.trim() !== '');
+            
+            for (const cell of cells) {
+                html += `<td>${cell.trim()}</td>`;
+            }
+            
+            html += '</tr>';
+        }
+        
+        html += '</tbody></table>';
+        return html;
+    });
 }
 
 // 在光标位置插入Markdown语法
